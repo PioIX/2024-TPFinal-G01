@@ -1,38 +1,98 @@
-"use client"; 
+"use client";
 
 import Image from "next/image";
 import styles from "./page.module.css";
 import { useState } from "react";
+import { useRouter } from "next/router";
 
 export default function Home() {
+  const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
 
   const toggleForm = () => {
     setIsLogin(!isLogin);
+    setError(""); // Reset error on toggle
+  };
+
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(String(email).toLowerCase());
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(`Submitted: ${isLogin ? 'Login' : 'Register'}`);
+    setError("");
+
+    if (!validateEmail(email)) {
+      setError("Email inválido");
+      return;
+    }
+    
+    if (password.length < 6) {
+      setError("La contraseña debe tener al menos 6 caracteres");
+      return;
+    }
+
+    if (!isLogin && password !== confirmPassword) {
+      setError("Las contraseñas no coinciden");
+      return;
+    }
+
+    if (isLogin) {
+      // Simula la autenticación
+      const userData = JSON.parse(localStorage.getItem("user"));
+      if (userData && userData.email === email && userData.password === password) {
+        router.push("/game"); // Redirige a la página del juego
+      } else {
+        setError("Credenciales incorrectas");
+      }
+    } else {
+      console.log(`Submitted: Register`);
+      localStorage.setItem("user", JSON.stringify({ email, password })); // Guardar en localStorage
+      setIsLogin(true); // Cambiar a vista de inicio de sesión
+    }
   };
 
   return (
     <div className={styles.page}>
       <main className={styles.main}>
         <h1>{isLogin ? "Login" : "Register"}</h1>
+        {error && <p className={styles.error}>{error}</p>}
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formGroup}>
             <label htmlFor="email">Email:</label>
-            <input type="email" id="email" required />
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </div>
           <div className={styles.formGroup}>
             <label htmlFor="password">Password:</label>
-            <input type="password" id="password" required />
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
           </div>
           {!isLogin && (
             <div className={styles.formGroup}>
               <label htmlFor="confirm-password">Confirm Password:</label>
-              <input type="password" id="confirm-password" required />
+              <input
+                type="password"
+                id="confirm-password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+              />
             </div>
           )}
           <button type="submit" className={styles.submitButton}>
