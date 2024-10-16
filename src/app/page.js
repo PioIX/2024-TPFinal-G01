@@ -1,9 +1,8 @@
 "use client";
 
-import Image from "next/image";
-import styles from "./page.module.css";
 import { useState } from "react";
 import { useRouter } from "next/router";
+import styles from "./page.module.css";
 
 export default function Home() {
   const router = useRouter();
@@ -15,7 +14,7 @@ export default function Home() {
 
   const toggleForm = () => {
     setIsLogin(!isLogin);
-    setError(""); // Reset error on toggle
+    setError("");
   };
 
   const validateEmail = (email) => {
@@ -43,7 +42,6 @@ export default function Home() {
     }
 
     if (isLogin) {
-      // Simula la autenticación
       const userData = JSON.parse(localStorage.getItem("user"));
       if (userData && userData.email === email && userData.password === password) {
         router.push("/game"); // Redirige a la página del juego
@@ -51,9 +49,8 @@ export default function Home() {
         setError("Credenciales incorrectas");
       }
     } else {
-      console.log(`Submitted: Register`);
-      localStorage.setItem("user", JSON.stringify({ email, password })); // Guardar en localStorage
-      setIsLogin(true); // Cambiar a vista de inicio de sesión
+      localStorage.setItem("user", JSON.stringify({ email, password }));
+      setIsLogin(true); // Cambia a vista de inicio de sesión
     }
   };
 
