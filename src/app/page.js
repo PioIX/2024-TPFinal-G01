@@ -1,20 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/router";
 import styles from "./page.module.css";
 
 export default function Home() {
-  const router = useRouter();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false); // Nuevo estado para el éxito
 
   const toggleForm = () => {
     setIsLogin(!isLogin);
     setError("");
+    setSuccess(false); // Reset del estado de éxito al cambiar entre login y registro
   };
 
   const validateEmail = (email) => {
@@ -25,12 +25,13 @@ export default function Home() {
   const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
+    setSuccess(false); // Reset del mensaje de éxito al enviar el formulario
 
     if (!validateEmail(email)) {
       setError("Email inválido");
       return;
     }
-    
+
     if (password.length < 6) {
       setError("La contraseña debe tener al menos 6 caracteres");
       return;
@@ -44,13 +45,14 @@ export default function Home() {
     if (isLogin) {
       const userData = JSON.parse(localStorage.getItem("user"));
       if (userData && userData.email === email && userData.password === password) {
-        router.push("/game"); // Redirige a la página del juego
+        setSuccess(true); // Establecer éxito en lugar de redirigir
       } else {
         setError("Credenciales incorrectas");
       }
     } else {
       localStorage.setItem("user", JSON.stringify({ email, password }));
       setIsLogin(true); // Cambia a vista de inicio de sesión
+      setSuccess(true); // Mostrar éxito al registrarse correctamente
     }
   };
 
@@ -59,6 +61,7 @@ export default function Home() {
       <main className={styles.main}>
         <h1>{isLogin ? "Login" : "Register"}</h1>
         {error && <p className={styles.error}>{error}</p>}
+        {success && <p className={styles.success}>¡Operación exitosa!</p>} {/* Mensaje de éxito */}
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formGroup}>
             <label htmlFor="email">Email:</label>
