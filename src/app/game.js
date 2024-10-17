@@ -16,7 +16,7 @@ export default function Game() {
 
     // Aquí puedes agregar la lógica para iniciar el juego
     alert(`¡Bienvenido al juego, ${playerName}!`);
-  };
+  }; 
 
   return (
     <div className={styles.container}>

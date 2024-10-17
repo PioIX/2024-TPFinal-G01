@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import styles from "./page.module.css";
-import Link from "next/link"; // Importa Link de Next.js
+import Game from "./game"
+import Link from "next/link"; 
 
 export default function Home() {
   const [isLogin, setIsLogin] = useState(true);
@@ -66,10 +67,10 @@ export default function Home() {
         <main className={styles.main}>
           <h1>Bienvenido al Juego</h1>
           <p>¡Comienza a jugar ahora!</p>
-          {/* Agrega el botón "Jugar" */}
-          <Link href="/game"> {/* Cambia a "/game" en lugar de "/game.js" */}
+          <Link href="/game"> 
             <button className={styles.startButton}>Jugar</button>
           </Link>
+
         </main>
         <footer className={styles.footer}>
           <p>© 2024 Mi Aplicación</p>
