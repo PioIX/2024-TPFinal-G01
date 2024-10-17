@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import styles from "./page.module.css";
+import Link from "next/link"; // Importa Link de Next.js
 
 export default function Home() {
   const [isLogin, setIsLogin] = useState(true);
@@ -10,6 +11,7 @@ export default function Home() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false); // Nuevo estado para el éxito
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Estado para controlar si el usuario está logueado
 
   const toggleForm = () => {
     setIsLogin(!isLogin);
@@ -45,7 +47,8 @@ export default function Home() {
     if (isLogin) {
       const userData = JSON.parse(localStorage.getItem("user"));
       if (userData && userData.email === email && userData.password === password) {
-        setSuccess(true); // Establecer éxito en lugar de redirigir
+        setIsLoggedIn(true); // Cambia a estado logueado
+        setSuccess(true); // Establecer éxito
       } else {
         setError("Credenciales incorrectas");
       }
@@ -56,6 +59,26 @@ export default function Home() {
     }
   };
 
+  // Renderiza la página del juego si el usuario está logueado
+  if (isLoggedIn) {
+    return (
+      <div className={styles.page}>
+        <main className={styles.main}>
+          <h1>Bienvenido al Juego</h1>
+          <p>¡Comienza a jugar ahora!</p>
+          {/* Agrega el botón "Jugar" */}
+          <Link href="/game"> {/* Cambia a "/game" en lugar de "/game.js" */}
+            <button className={styles.startButton}>Jugar</button>
+          </Link>
+        </main>
+        <footer className={styles.footer}>
+          <p>© 2024 Mi Aplicación</p>
+        </footer>
+      </div>
+    );
+  }
+
+  // Renderiza el formulario de inicio de sesión o registro
   return (
     <div className={styles.page}>
       <main className={styles.main}>
