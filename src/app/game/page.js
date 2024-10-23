@@ -1,7 +1,9 @@
 "use client";
 
 import { useState } from "react";
+
 import styles from "./page.module.css"; // Asegúrate de crear este archivo CSS
+
 
 export default function Game() {
   const [playerName, setPlayerName] = useState("");
