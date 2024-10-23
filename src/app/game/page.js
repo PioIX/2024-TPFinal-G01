@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-
-import styles from "./page.module.css"; // Asegúrate de crear este archivo CSS
-
+import { useRouter } from "next/navigation";
+import styles from "./page.module.css";
 
 export default function Game() {
   const [playerName, setPlayerName] = useState("");
   const [error, setError] = useState("");
+  const router = useRouter(); 
 
   const handleStartGame = (e) => {
     e.preventDefault();
@@ -16,9 +16,8 @@ export default function Game() {
       return;
     }
 
-    // Aquí puedes agregar la lógica para iniciar el juego
-    alert(`¡Bienvenido al juego, ${playerName}!`);
-  }; 
+    router.push("/realgame");
+  };
 
   return (
     <div className={styles.container}>
