@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import styles from "./page.module.css";
-import Game from "./game"
 import Link from "next/link"; 
 
 export default function Home() {
