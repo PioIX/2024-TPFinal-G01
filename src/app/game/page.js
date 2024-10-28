@@ -96,7 +96,7 @@ const AirHockeyGame = () => {
       <canvas
         ref={canvasRef}
         width={600}
-        height={800} // Manteniendo la altura larga
+        height={800}
         onMouseMove={handleMouseMove}
         className={styles.canvas}
       />
