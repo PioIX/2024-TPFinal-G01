@@ -30,9 +30,10 @@ export default function Game() {
     let ballX = canvas.width / 2;
     let ballY = canvas.height / 2;
     const ballRadius = 10;
-    let dx = 3; // Velocidad en el eje X
-    let dy = 3; // Velocidad en el eje Y
-    const friction = 0.99; // Fricción para reducir la velocidad
+    let dx = 5; // Velocidad en el eje X
+    let dy = 5; // Velocidad en el eje Y
+    // Eliminamos la fricción para que la pelota no se detenga
+    const friction = 1; // Esto se puede dejar fuera si no se va a usar
 
     // Paleta del jugador
     const paddleHeight = 70;
@@ -102,11 +103,9 @@ export default function Game() {
       context.fill();
       context.closePath();
 
-      // Mueve la pelota con fricción
+      // Mueve la pelota
       ballX += dx;
       ballY += dy;
-      dx *= friction;
-      dy *= friction;
 
       // Rebote en los bordes superior e inferior
       if (ballY + dy > canvas.height - ballRadius || ballY + dy < ballRadius) {
@@ -147,8 +146,8 @@ export default function Game() {
     const resetBall = () => {
       ballX = canvas.width / 2;
       ballY = canvas.height / 2;
-      dx = 3 * (Math.random() > 0.5 ? 1 : -1);
-      dy = 3 * (Math.random() > 0.5 ? 1 : -1);
+      dx = 5 * (Math.random() > 0.5 ? 1 : -1); // Velocidad inicial en el eje X
+      dy = 5 * (Math.random() > 0.5 ? 1 : -1); // Velocidad inicial en el eje Y
     };
 
     // Control de la paleta del jugador 1
