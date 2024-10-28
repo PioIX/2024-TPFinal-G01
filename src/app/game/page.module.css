@@ -1,0 +1,13 @@
+.gameContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.canvas {
+  border: 1px solid black;
+}
+
+.scoreBoard {
+  margin-top: 10px;
+}
