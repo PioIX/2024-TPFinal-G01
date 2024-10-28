@@ -1,110 +1,95 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import styles from "./page.module.css";
+import { useState, useEffect, useRef } from "react";
+import styles from "../page.module.css"; 
 
-const AirHockeyGame = () => {
+export default function Game() {
+  const [playerName, setPlayerName] = useState("");
+  const [error, setError] = useState("");
   const canvasRef = useRef(null);
-  const [playerScore, setPlayerScore] = useState(0);
-  const paddleRadius = 30; // Radio del círculo de la paleta
-  const puckRadius = 10; // Radio del disco
+  const [gameStarted, setGameStarted] = useState(false);
 
-  let paddleY = 400; // Posición inicial de la paleta
-  let puckX = 300; // Posición inicial de la pelota
-  let puckY = 500; // Posición inicial de la pelota (debajo de la paleta)
-  let puckVelocityX = 0;
-  let puckVelocityY = 0;
-  const friction = 0.35; // Factor de fricción para desacelerar la pelota
-
-  const draw = (ctx) => {
-    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-
-    // Dibuja la pelota (puck azul)
-    ctx.beginPath();
-    ctx.arc(puckX, puckY, puckRadius, 0, Math.PI * 2);
-    ctx.fillStyle = "blue"; // Color de la pelota
-    ctx.fill();
-    ctx.closePath();
-
-    // Dibuja la paleta como un círculo
-    ctx.beginPath();
-    ctx.arc(50, paddleY, paddleRadius, 0, Math.PI * 2); // Paleta en el lado izquierdo
-    ctx.fillStyle = "red"; // Color de la paleta
-    ctx.fill();
-    ctx.closePath();
-  };
-
-  const update = () => {
-    // Aplica fricción a las velocidades
-    puckVelocityX *= friction;
-    puckVelocityY *= friction;
-
-    // Actualiza la posición de la pelota
-    puckX += puckVelocityX;
-    puckY += puckVelocityY;
-
-    // Colisiones con las paredes
-    if (puckX + puckRadius > canvasRef.current.width || puckX - puckRadius < 0) {
-      puckVelocityX = -puckVelocityX;
+  const handleStartGame = (e) => {
+    e.preventDefault();
+    if (playerName.trim() === "") {
+      setError("Por favor, ingresa tu nombre.");
+      return;
     }
-    if (puckY + puckRadius > canvasRef.current.height || puckY - puckRadius < 0) {
-      puckVelocityY = -puckVelocityY;
-    }
-
-    // Si la velocidad es muy baja, detén la pelota
-    if (Math.abs(puckVelocityX) < 0.1 && Math.abs(puckVelocityY) < 0.1) {
-      puckVelocityX = 0;
-      puckVelocityY = 0;
-    }
-
-    // Colisión con la paleta
-    if (
-      puckX - puckRadius < 50 + paddleRadius && // Límite derecho de la paleta
-      puckY > paddleY - paddleRadius &&
-      puckY < paddleY + paddleRadius
-    ) {
-      // Cambia la dirección de la pelota al ser golpeada
-      puckVelocityX = 5; // Cambia la velocidad al ser golpeada
-      puckVelocityY = (paddleY - puckY) / 5; // Direcciona el movimiento verticalmente según el golpe
-      setPlayerScore(playerScore + 1); // Aumenta la puntuación del jugador
-    }
-
-    const ctx = canvasRef.current.getContext("2d");
-    draw(ctx);
-  };
-
-  const handleMouseMove = (event) => {
-    const canvas = canvasRef.current;
-    const rect = canvas.getBoundingClientRect();
-    paddleY = event.clientY - rect.top; // Ajuste para la posición de la paleta
-
-    // Asegura que la paleta no salga del lienzo
-    paddleY = Math.max(paddleRadius, Math.min(canvas.height - paddleRadius, paddleY));
+    setError("");
+    setGameStarted(true);
   };
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext("2d");
+    if (!gameStarted) return;
 
-    const interval = setInterval(update, 1000 / 60);
-    return () => clearInterval(interval);
-  }, []);
+    const canvas = canvasRef.current;
+    const context = canvas.getContext("2d");
+    let ballX = canvas.width / 2;
+    let ballY = canvas.height / 2;
+    const ballRadius = 10;
+    let dx = 2; // Velocidad en el eje X
+    let dy = 2; // Velocidad en el eje Y
+
+    const draw = () => {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Dibuja la cancha
+      context.fillStyle = "#0095DD";
+      context.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Dibuja la pelota
+      context.beginPath();
+      context.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+      context.fillStyle = "#FFFFFF";
+      context.fill();
+      context.closePath();
+
+      // Mueve la pelota
+      if (ballX + dx > canvas.width - ballRadius || ballX + dx < ballRadius) {
+        dx = -dx;
+      }
+      if (ballY + dy > canvas.height - ballRadius || ballY + dy < ballRadius) {
+        dy = -dy;
+      }
+
+      ballX += dx;
+      ballY += dy;
+
+      requestAnimationFrame(draw);
+    };
+
+    draw();
+  }, [gameStarted]);
 
   return (
-    <div className={styles.gameContainer}>
-      <h1>Air Hockey</h1>
-      <canvas
-        ref={canvasRef}
-        width={600}
-        height={800}
-        onMouseMove={handleMouseMove}
-        className={styles.canvas}
-      />
-      <div className={styles.scoreBoard}>
-        <p>Jugador: {playerScore}</p>
-      </div>
+    <div className={styles.container}>
+      <h1>Iniciar el Juego</h1>
+      {error && <p className={styles.error}>{error}</p>}
+      {!gameStarted && (
+        <form onSubmit={handleStartGame} className={styles.form}>
+          <div className={styles.formGroup}>
+            <label htmlFor="playerName">Nombre del Jugador:</label>
+            <input
+              type="text"
+              id="playerName"
+              value={playerName}
+              onChange={(e) => setPlayerName(e.target.value)}
+              required
+            />
+          </div>
+          <button type="submit" className={styles.startButton}>
+            Iniciar Juego
+          </button>
+        </form>
+      )}
+      {gameStarted && (
+        <canvas
+          ref={canvasRef}
+          width={800}
+          height={400}
+          style={{ border: "1px solid black", marginTop: "20px" }}
+        />
+      )}
     </div>
   );
-};
-
-export default AirHockeyGame;
+}
