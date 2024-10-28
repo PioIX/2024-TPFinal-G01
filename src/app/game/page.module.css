@@ -1,13 +1,23 @@
-.gameContainer {
+/* page.module.css */
+
+.container {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  text-align: center;
 }
 
-.canvas {
-  border: 1px solid black;
+.canvasContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100vw; /* Asegura que ocupe el ancho completo */
+  height: 100vh; /* Asegura que ocupe el alto completo */
 }
 
-.scoreBoard {
-  margin-top: 10px;
+canvas {
+  margin: auto;
+  border: 2px solid black;
 }
