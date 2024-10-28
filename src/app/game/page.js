@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import styles from "../page.module.css"; 
+import styles from "../page.module.css";
 
 export default function Game() {
   const [playerName, setPlayerName] = useState("");
@@ -32,15 +32,41 @@ export default function Game() {
 
     const draw = () => {
       context.clearRect(0, 0, canvas.width, canvas.height);
-      
-      // Dibuja la cancha
-      context.fillStyle = "#0095DD";
+
+      // Fondo de la cancha
+      context.fillStyle = "#FFFFFF";
       context.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Línea central
+      context.beginPath();
+      context.moveTo(canvas.width / 2, 0);
+      context.lineTo(canvas.width / 2, canvas.height);
+      context.strokeStyle = "#FF0000";
+      context.lineWidth = 2;
+      context.stroke();
+
+      // Círculo central
+      context.beginPath();
+      context.arc(canvas.width / 2, canvas.height / 2, 50, 0, Math.PI * 2);
+      context.strokeStyle = "#FF0000";
+      context.lineWidth = 2;
+      context.stroke();
+
+      // Zonas de gol
+      const goalWidth = 100;
+      const goalHeight = 10;
+
+      // Zona de gol izquierda
+      context.fillStyle = "#FF0000";
+      context.fillRect(0, (canvas.height - goalWidth) / 2, goalHeight, goalWidth);
+
+      // Zona de gol derecha
+      context.fillRect(canvas.width - goalHeight, (canvas.height - goalWidth) / 2, goalHeight, goalWidth);
 
       // Dibuja la pelota
       context.beginPath();
       context.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
-      context.fillStyle = "#FFFFFF";
+      context.fillStyle = "#000000";
       context.fill();
       context.closePath();
 
