@@ -71,16 +71,4 @@ export default function AirHockey() {
     }));
   };
 
-  return (
-    <div>
-      <h1>Air Hockey</h1>
-      <canvas
-        ref={canvasRef}
-        width={500}
-        height={500}
-        onMouseMove={handleMouseMove}
-        style={{ border: "2px solid black" }}
-      />
-    </div>
-  );
 }
