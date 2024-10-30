@@ -9,7 +9,7 @@ export default function Game() {
   const canvasRef = useRef(null);
   const [gameStarted, setGameStarted] = useState(false);
   const [score, setScore] = useState({ left: 0, right: 0 });
-  const [timeLeft, setTimeLeft] = useState(60); // 60 segundos de tiempo de juego
+  const [timeLeft, setTimeLeft] = useState(60);
 
   const handleStartGame = (e) => {
     e.preventDefault();
@@ -30,17 +30,17 @@ export default function Game() {
     let ballX = canvas.width / 2;
     let ballY = canvas.height / 2;
     const ballRadius = 10;
-    let dx = 5; // Velocidad en el eje X (ajustado para mayor velocidad)
-    let dy = 5; // Velocidad en el eje Y (ajustado para mayor velocidad)
+    let dx = 5;
+    let dy = 5;
 
-    // Paleta del jugador
     const paddleHeight = 70;
     const paddleWidth = 10;
-    let player1Y = (canvas.height - paddleHeight) / 2; // Posición del primer jugador
-    let player2Y = (canvas.height - paddleHeight) / 2; // Posición del segundo jugador
+    let player1Y = (canvas.height - paddleHeight) / 2;
+    let player2Y = (canvas.height - paddleHeight) / 2;
     let playerSpeed = 5;
 
-    // Variables para controlar la cuenta regresiva
+    let hitCount = 0;
+
     const timerInterval = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 0) {
@@ -52,15 +52,23 @@ export default function Game() {
       });
     }, 1000);
 
-    // Función para dibujar la cancha y actualizar el estado del juego
+    const drawFireEffect = () => {
+      context.fillStyle = "orange";
+      context.beginPath();
+      context.arc(ballX, ballY, ballRadius + 5, 0, Math.PI * 2);
+      context.fill();
+      context.fillStyle = "red";
+      context.beginPath();
+      context.arc(ballX, ballY, ballRadius + 3, 0, Math.PI * 2);
+      context.fill();
+    };
+
     const draw = () => {
       context.clearRect(0, 0, canvas.width, canvas.height);
 
-      // Fondo de la cancha
       context.fillStyle = "#FFFFFF";
       context.fillRect(0, 0, canvas.width, canvas.height);
 
-      // Línea central
       context.beginPath();
       context.moveTo(canvas.width / 2, 0);
       context.lineTo(canvas.width / 2, canvas.height);
@@ -68,73 +76,63 @@ export default function Game() {
       context.lineWidth = 2;
       context.stroke();
 
-      // Círculo central
-      context.beginPath();
-      context.arc(canvas.width / 2, canvas.height / 2, 50, 0, Math.PI * 2);
-      context.strokeStyle = "#FF0000";
-      context.lineWidth = 2;
-      context.stroke();
-
-      // Zonas de gol
       const goalWidth = 100;
       const goalHeight = 10;
 
-      // Zona de gol izquierda
       context.fillStyle = "#FF0000";
       context.fillRect(0, (canvas.height - goalWidth) / 2, goalHeight, goalWidth);
-
-      // Zona de gol derecha
       context.fillRect(canvas.width - goalHeight, (canvas.height - goalWidth) / 2, goalHeight, goalWidth);
 
-      // Dibuja la paleta del jugador 1
       context.fillStyle = "#0000FF";
       context.fillRect(20, player1Y, paddleWidth, paddleHeight);
-
-      // Dibuja la paleta del jugador 2
-      context.fillStyle = "#00FF00"; // Color del segundo jugador
+      context.fillStyle = "#00FF00";
       context.fillRect(canvas.width - paddleWidth - 20, player2Y, paddleWidth, paddleHeight);
 
-      // Dibuja la pelota
       context.beginPath();
       context.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
       context.fillStyle = "#000000";
       context.fill();
       context.closePath();
 
-      // Mueve la pelota sin fricción
       ballX += dx;
       ballY += dy;
 
-      // Rebote en los bordes superior e inferior
+      // Rebote en las paredes horizontales
       if (ballY + dy > canvas.height - ballRadius || ballY + dy < ballRadius) {
         dy = -dy;
       }
 
       // Detección de colisión con la paleta del jugador 1
-      if (
-        ballX - ballRadius < 30 && // Cercano al lado izquierdo (donde está la paleta)
-        ballY > player1Y &&
-        ballY < player1Y + paddleHeight
-      ) {
+      if (ballX - ballRadius < 30 && ballY > player1Y && ballY < player1Y + paddleHeight) {
         dx = -dx;
+        ballX = 30 + ballRadius; // Asegúrate de que la pelota no se "meta" en la paleta
+        hitCount++;
       }
 
       // Detección de colisión con la paleta del jugador 2
-      if (
-        ballX + ballRadius > canvas.width - paddleWidth - 30 && // Cercano al lado derecho (donde está la paleta)
-        ballY > player2Y &&
-        ballY < player2Y + paddleHeight
-      ) {
+      if (ballX + ballRadius > canvas.width - paddleWidth - 30 && ballY > player2Y && ballY < player2Y + paddleHeight) {
         dx = -dx;
+        ballX = canvas.width - paddleWidth - 30 - ballRadius; // Asegúrate de que la pelota no se "meta" en la paleta
+        hitCount++;
+      }
+
+      // Aumentar la velocidad y dibujar el fuego cada 3 toques
+      if (hitCount % 3 === 0 && hitCount > 0) {
+        dx *= 1.1; // Aumenta la velocidad
+        drawFireEffect(); // Dibuja el efecto de fuego
       }
 
       // Puntuación en las zonas de gol
-      if (ballX + ballRadius > canvas.width) {
-        setScore((prev) => ({ ...prev, left: prev.left + 1 }));
+      if (ballX + ballRadius > canvas.width - goalHeight) {
+        if (ballY > (canvas.height - goalWidth) / 2 && ballY < (canvas.height + goalWidth) / 2) {
+          setScore((prev) => ({ ...prev, left: prev.left + 1 }));
+        }
         resetBall();
       }
-      if (ballX - ballRadius < 0) {
-        setScore((prev) => ({ ...prev, right: prev.right + 1 }));
+      if (ballX - ballRadius < goalHeight) {
+        if (ballY > (canvas.height - goalWidth) / 2 && ballY < (canvas.height + goalWidth) / 2) {
+          setScore((prev) => ({ ...prev, right: prev.right + 1 }));
+        }
         resetBall();
       }
 
@@ -144,11 +142,11 @@ export default function Game() {
     const resetBall = () => {
       ballX = canvas.width / 2;
       ballY = canvas.height / 2;
-      dx = 5 * (Math.random() > 0.5 ? 1 : -1); // Mantener una velocidad inicial positiva o negativa
-      dy = 5 * (Math.random() > 0.5 ? 1 : -1); // Mantener una velocidad inicial positiva o negativa
+      dx = 5 * (Math.random() > 0.5 ? 1 : -1);
+      dy = 5 * (Math.random() > 0.5 ? 1 : -1);
+      hitCount = 0;
     };
 
-    // Control de la paleta del jugador 1
     const handleKeyDown = (e) => {
       if (e.key === "ArrowUp" && player1Y > 0) {
         player1Y -= playerSpeed;
@@ -156,7 +154,6 @@ export default function Game() {
       if (e.key === "ArrowDown" && player1Y < canvas.height - paddleHeight) {
         player1Y += playerSpeed;
       }
-      // Control de la paleta del jugador 2 con O y L
       if (e.key === "o" && player2Y > 0) {
         player2Y -= playerSpeed;
       }
@@ -168,12 +165,11 @@ export default function Game() {
     draw();
     window.addEventListener("keydown", handleKeyDown);
 
-    // Limpieza
     return () => {
       clearInterval(timerInterval);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [gameStarted]); // Eliminar player2Y de las dependencias
+  }, [gameStarted]);
 
   return (
     <div className={styles.container}>
