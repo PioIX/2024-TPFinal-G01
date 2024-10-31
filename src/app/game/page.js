@@ -3,13 +3,40 @@
 import { useState, useEffect, useRef } from "react";
 import styles from "../page.module.css";
 
+class Ball {
+  constructor(canvasWidth, canvasHeight) {
+    this.x = canvasWidth / 2;
+    this.y = canvasHeight / 2;
+    this.dx = 5; // Velocidad horizontal
+    this.dy = 5; // Velocidad vertical
+    this.radius = 10;
+  }
+
+  update() {
+    this.x += this.dx;
+    this.y += this.dy;
+  }
+
+  draw(context) {
+    context.beginPath();
+    context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+    context.fillStyle = "#000000"; // Color de la pelota
+    context.fill();
+    context.closePath();
+  }
+}
+
 export default function Game() {
   const [playerName, setPlayerName] = useState("");
   const [error, setError] = useState("");
   const canvasRef = useRef(null);
   const [gameStarted, setGameStarted] = useState(false);
-  const [score, setScore] = useState({ left: 0, right: 0 });
-  const [timeLeft, setTimeLeft] = useState(60);
+  
+  const paddleHeight = 70;
+  const paddleWidth = 10;
+  const playerSpeed = 5; 
+  let player1Y = 0;
+  let player2Y = 0;
 
   const handleStartGame = (e) => {
     e.preventDefault();
@@ -27,151 +54,77 @@ export default function Game() {
     const canvas = canvasRef.current;
     const context = canvas.getContext("2d");
 
-    let ballX = canvas.width / 2;
-    let ballY = canvas.height / 2;
-    const ballRadius = 10;
-    let dx = 5;
-    let dy = 5;
+    // Carga la imagen de fondo
+    const backgroundImage = new Image();
+    backgroundImage.src = "image.png"; 
 
-    const paddleHeight = 70;
-    const paddleWidth = 10;
-    let player1Y = (canvas.height - paddleHeight) / 2;
-    let player2Y = (canvas.height - paddleHeight) / 2;
-    let playerSpeed = 5;
-
-    let hitCount = 0;
-
-    const timerInterval = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 0) {
-          clearInterval(timerInterval);
-          setGameStarted(false);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    const drawFireEffect = () => {
-      context.fillStyle = "orange";
-      context.beginPath();
-      context.arc(ballX, ballY, ballRadius + 5, 0, Math.PI * 2);
-      context.fill();
-      context.fillStyle = "red";
-      context.beginPath();
-      context.arc(ballX, ballY, ballRadius + 3, 0, Math.PI * 2);
-      context.fill();
-    };
+    const ball = new Ball(canvas.width, canvas.height);
 
     const draw = () => {
       context.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Dibuja la imagen de fondo
+      context.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
 
-      context.fillStyle = "#FFFFFF";
-      context.fillRect(0, 0, canvas.width, canvas.height);
-
-      context.beginPath();
-      context.moveTo(canvas.width / 2, 0);
-      context.lineTo(canvas.width / 2, canvas.height);
-      context.strokeStyle = "#FF0000";
-      context.lineWidth = 2;
-      context.stroke();
-
-      const goalWidth = 100;
-      const goalHeight = 10;
-
-      context.fillStyle = "#FF0000";
-      context.fillRect(0, (canvas.height - goalWidth) / 2, goalHeight, goalWidth); // Goal left
-      context.fillRect(canvas.width - goalHeight, (canvas.height - goalWidth) / 2, goalHeight, goalWidth); // Goal right
-
-      context.fillStyle = "#0000FF";
+      // Dibuja las palas de los jugadores
+      context.fillStyle = "#0000FF"; // Color de la pala del jugador 1
       context.fillRect(20, player1Y, paddleWidth, paddleHeight);
-      context.fillStyle = "#00FF00";
+      context.fillStyle = "#00FF00"; // Color de la pala del jugador 2
       context.fillRect(canvas.width - paddleWidth - 20, player2Y, paddleWidth, paddleHeight);
+      
+      ball.update(); // Actualiza la posición de la pelota
+      ball.draw(context); // Dibuja la pelota
 
-      context.beginPath();
-      context.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
-      context.fillStyle = "#000000";
-      context.fill();
-      context.closePath();
-
-      ballX += dx;
-      ballY += dy;
-
-      // Rebote en las paredes horizontales
-      if (ballY + dy > canvas.height - ballRadius || ballY + dy < ballRadius) {
-        dy = -dy;
+      // Rebote en las paredes
+      if (ball.y + ball.dy > canvas.height - ball.radius || ball.y + ball.dy < ball.radius) {
+        ball.dy = -ball.dy; // Cambia la dirección vertical
       }
 
       // Detección de colisión con la paleta del jugador 1
-      if (ballX - ballRadius < 30 && ballY > player1Y && ballY < player1Y + paddleHeight) {
-        dx = -dx;
-        ballX = 30 + ballRadius; // Asegúrate de que la pelota no se "meta" en la paleta
-        hitCount++;
+      if (ball.x - ball.radius < 30 && ball.y > player1Y && ball.y < player1Y + paddleHeight) {
+        ball.dx = -ball.dx; // Cambia la dirección horizontal
+        ball.x = 30 + ball.radius; // Asegúrate de que la pelota no se "meta" en la paleta
       }
 
       // Detección de colisión con la paleta del jugador 2
-      if (ballX + ballRadius > canvas.width - paddleWidth - 30 && ballY > player2Y && ballY < player2Y + paddleHeight) {
-        dx = -dx;
-        ballX = canvas.width - paddleWidth - 30 - ballRadius; // Asegúrate de que la pelota no se "meta" en la paleta
-        hitCount++;
-      }
-      
-      // Puntuación en las zonas de gol
-      const leftGoalX = 0;
-      const leftGoalY = (canvas.height - goalWidth) / 2;
-      const rightGoalX = canvas.width - goalHeight;
-      const rightGoalY = (canvas.height - goalWidth) / 2;
-
-      // Detecta si la pelota entra en la zona de gol del lado izquierdo
-      if (ballX + ballRadius > leftGoalX && ballX + ballRadius < leftGoalX + goalHeight) {
-        if (ballY > leftGoalY && ballY < leftGoalY + goalWidth) {
-          setScore((prev) => ({ ...prev, right: prev.right + 1 })); // Anota para el jugador derecho
-        }
-        resetBall();
-      }
-
-      // Detecta si la pelota entra en la zona de gol del lado derecho
-      if (ballX - ballRadius < rightGoalX + goalHeight && ballX - ballRadius > rightGoalX) {
-        if (ballY > rightGoalY && ballY < rightGoalY + goalWidth) {
-          setScore((prev) => ({ ...prev, left: prev.left + 1 })); // Anota para el jugador izquierdo
-        }
-        resetBall();
+      if (ball.x + ball.radius > canvas.width - paddleWidth - 30 && ball.y > player2Y && ball.y < player2Y + paddleHeight) {
+        ball.dx = -ball.dx; // Cambia la dirección horizontal
+        ball.x = canvas.width - paddleWidth - 30 - ball.radius; // Asegúrate de que la pelota no se "meta" en la paleta
       }
 
       requestAnimationFrame(draw);
     };
 
-    const resetBall = () => {
-      ballX = canvas.width / 2;
-      ballY = canvas.height / 2;
-      dx = 5 * (Math.random() > 0.5 ? 1 : -1);
-      dy = 5 * (Math.random() > 0.5 ? 1 : -1);
-      hitCount = 0;
+    backgroundImage.onload = () => {
+      draw(); // Inicia el dibujo una vez que la imagen se ha cargado
     };
 
-    const handleKeyDown = (e) => {
-      if (e.key === "ArrowUp" && player1Y > 0) {
-        player1Y -= playerSpeed;
-      }
-      if (e.key === "ArrowDown" && player1Y < canvas.height - paddleHeight) {
-        player1Y += playerSpeed;
-      }
-      if (e.key === "o" && player2Y > 0) {
-        player2Y -= playerSpeed;
-      }
-      if (e.key === "l" && player2Y < canvas.height - paddleHeight) {
-        player2Y += playerSpeed;
-      }
-    };
-
-    draw();
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      clearInterval(timerInterval);
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [gameStarted]);
+
+  const handleKeyDown = (e) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const maxPlayerY = canvas.height - paddleHeight;
+
+    if (e.key === "ArrowUp" && player1Y > 0) {
+      player1Y -= playerSpeed;
+    }
+    if (e.key === "ArrowDown" && player1Y < maxPlayerY) {
+      player1Y += playerSpeed;
+    }
+    if (e.key === "o" && player2Y > 0) {
+      player2Y -= playerSpeed;
+    }
+    if (e.key === "l" && player2Y < maxPlayerY) {
+      player2Y += playerSpeed;
+    }
+  };
 
   return (
     <div className={styles.container}>
@@ -196,10 +149,6 @@ export default function Game() {
       )}
       {gameStarted && (
         <div className={styles.canvasContainer}>
-          <div className={styles.scoreBoard}>
-            <p>{`Tiempo restante: ${timeLeft}s`}</p>
-            <p>{`Puntaje: Izquierda ${score.left} - Derecha ${score.right}`}</p>
-          </div>
           <canvas
             ref={canvasRef}
             width={800}
