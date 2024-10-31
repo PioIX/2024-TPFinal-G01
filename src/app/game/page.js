@@ -80,8 +80,8 @@ export default function Game() {
       const goalHeight = 10;
 
       context.fillStyle = "#FF0000";
-      context.fillRect(0, (canvas.height - goalWidth) / 2, goalHeight, goalWidth);
-      context.fillRect(canvas.width - goalHeight, (canvas.height - goalWidth) / 2, goalHeight, goalWidth);
+      context.fillRect(0, (canvas.height - goalWidth) / 2, goalHeight, goalWidth); // Goal left
+      context.fillRect(canvas.width - goalHeight, (canvas.height - goalWidth) / 2, goalHeight, goalWidth); // Goal right
 
       context.fillStyle = "#0000FF";
       context.fillRect(20, player1Y, paddleWidth, paddleHeight);
@@ -115,23 +115,25 @@ export default function Game() {
         ballX = canvas.width - paddleWidth - 30 - ballRadius; // Asegúrate de que la pelota no se "meta" en la paleta
         hitCount++;
       }
-
-      // Aumentar la velocidad y dibujar el fuego cada 3 toques
-      if (hitCount % 3 === 0 && hitCount > 0) {
-        dx *= 1.1; // Aumenta la velocidad
-        drawFireEffect(); // Dibuja el efecto de fuego
-      }
-
+      
       // Puntuación en las zonas de gol
-      if (ballX + ballRadius > canvas.width - goalHeight) {
-        if (ballY > (canvas.height - goalWidth) / 2 && ballY < (canvas.height + goalWidth) / 2) {
-          setScore((prev) => ({ ...prev, left: prev.left + 1 }));
+      const leftGoalX = 0;
+      const leftGoalY = (canvas.height - goalWidth) / 2;
+      const rightGoalX = canvas.width - goalHeight;
+      const rightGoalY = (canvas.height - goalWidth) / 2;
+
+      // Detecta si la pelota entra en la zona de gol del lado izquierdo
+      if (ballX + ballRadius > leftGoalX && ballX + ballRadius < leftGoalX + goalHeight) {
+        if (ballY > leftGoalY && ballY < leftGoalY + goalWidth) {
+          setScore((prev) => ({ ...prev, right: prev.right + 1 })); // Anota para el jugador derecho
         }
         resetBall();
       }
-      if (ballX - ballRadius < goalHeight) {
-        if (ballY > (canvas.height - goalWidth) / 2 && ballY < (canvas.height + goalWidth) / 2) {
-          setScore((prev) => ({ ...prev, right: prev.right + 1 }));
+
+      // Detecta si la pelota entra en la zona de gol del lado derecho
+      if (ballX - ballRadius < rightGoalX + goalHeight && ballX - ballRadius > rightGoalX) {
+        if (ballY > rightGoalY && ballY < rightGoalY + goalWidth) {
+          setScore((prev) => ({ ...prev, left: prev.left + 1 })); // Anota para el jugador izquierdo
         }
         resetBall();
       }
