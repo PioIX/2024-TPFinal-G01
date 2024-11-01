@@ -1,23 +1,6 @@
-/* page.module.css */
-
-.container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  text-align: center;
-}
-
-.canvasContainer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100vw; /* Asegura que ocupe el ancho completo */
-  height: 100vh; /* Asegura que ocupe el alto completo */
-}
-
-canvas {
+.canvas {
+  display: block;
   margin: auto;
-  border: 2px solid black;
+  background-color: #ff0000; /* Color de fondo opcional */
+  border: 2px solid black; /* Borde opcional */
 }
