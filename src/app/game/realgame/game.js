@@ -3,32 +3,18 @@
 import { useEffect, useRef, useState } from "react";
 import styles from "./game.module.css";
 
-const canvasWidth = 500;
-const canvasHeight = 500;
-const paddleWidth = 60;
-const paddleHeight = 10;
+const CANVAS_WIDTH = 500;
+const CANVAS_HEIGHT = 500;
+const PADDLE_WIDTH = 60;
+const PADDLE_HEIGHT = 10;
+const PUCK_RADIUS = 15;
+const PUCK_SPEED = 5;
+const GOAL_MESSAGE_DURATION = 2000;
 
-export default function AirHockey() {
-  const canvasRef = useRef(null);
-  const [puck, setPuck] = useState({
-    x: canvasWidth / 2,
-    y: canvasHeight / 2,
-    radius: 15,
-    dx: 0,
-    dy: 0,
-  });
+const getRandomDirection = () => (Math.random() < 0.5 ? 1 : -1);
+const getRandomAngle = () => Math.random() * Math.PI / 4 + Math.PI / 4;
 
-  const [paddle, setPaddle] = useState({
-    x: (canvasWidth - paddleWidth) / 2,
-    y: canvasHeight - 30,
-    width: paddleWidth,
-    height: paddleHeight,
-  });
-
-  const [score, setScore] = useState(0);
-  const [goalMessage, setGoalMessage] = useState("");
-  const [messageTimeout, setMessageTimeout] = useState(null);
-
+const useGameLoop = (canvasRef, puck, paddle, setPuck, setScore, setGoalMessage) => {
   useEffect(() => {
     const canvas = canvasRef.current;
     const context = canvas.getContext("2d");
@@ -37,29 +23,101 @@ export default function AirHockey() {
     const draw = () => {
       context.clearRect(0, 0, canvas.width, canvas.height);
       drawScore(context);
-      drawPuck(context);
-      drawPaddle(context);
+      drawPuck(context, puck);
+      drawPaddle(context, paddle);
       updatePuck();
       animationFrameId = requestAnimationFrame(draw);
     };
 
-    draw();
+    const updatePuck = () => {
+      setPuck(prevPuck => {
+        const newPuck = { ...prevPuck };
+        newPuck.x += newPuck.dx;
+        newPuck.y += newPuck.dy;
 
+        // Collision detection
+        handleWallCollision(newPuck);
+        handlePaddleCollision(newPuck, paddle);
+
+        return newPuck;
+      });
+    };
+
+    const handleWallCollision = (newPuck) => {
+      if (newPuck.x + PUCK_RADIUS > CANVAS_WIDTH || newPuck.x - PUCK_RADIUS < 0) {
+        newPuck.dx *= -1; // Horizontal bounce
+      }
+
+      if (newPuck.y - PUCK_RADIUS < 0 || newPuck.y + PUCK_RADIUS > CANVAS_HEIGHT) {
+        setScore(prevScore => prevScore + 1);
+        setGoalMessage("¡Gol!");
+        resetPuck();
+      }
+    };
+
+    const handlePaddleCollision = (newPuck, paddle) => {
+      if (
+        newPuck.y + PUCK_RADIUS > paddle.y &&
+        newPuck.x > paddle.x &&
+        newPuck.x < paddle.x + paddle.width
+      ) {
+        newPuck.dy *= -1;
+        newPuck.y = paddle.y - PUCK_RADIUS; // Prevent sticking
+      }
+    };
+
+    draw();
+    
     return () => {
       cancelAnimationFrame(animationFrameId);
-      if (messageTimeout) clearTimeout(messageTimeout);
     };
-  }, [paddle, puck, goalMessage]);
+  }, [canvasRef, puck, paddle, setPuck, setScore, setGoalMessage]);
+};
 
-  const drawPuck = (context) => {
+const AirHockey = () => {
+  const canvasRef = useRef(null);
+  const [puck, setPuck] = useState({
+    x: CANVAS_WIDTH / 2,
+    y: CANVAS_HEIGHT / 2,
+    dx: 0,
+    dy: 0,
+  });
+
+  const [paddle, setPaddle] = useState({
+    x: (CANVAS_WIDTH - PADDLE_WIDTH) / 2,
+    y: CANVAS_HEIGHT - 30,
+    width: PADDLE_WIDTH,
+    height: PADDLE_HEIGHT,
+  });
+
+  const [score, setScore] = useState(0);
+  const [goalMessage, setGoalMessage] = useState("");
+  const [messageTimeout, setMessageTimeout] = useState(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.code === "Space" && puck.dx === 0 && puck.dy === 0) {
+        launchPuck();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [puck]);
+
+  useGameLoop(canvasRef, puck, paddle, setPuck, setScore, setGoalMessage);
+
+  const drawPuck = (context, puck) => {
     context.beginPath();
-    context.arc(puck.x, puck.y, puck.radius, 0, Math.PI * 2);
+    context.arc(puck.x, puck.y, PUCK_RADIUS, 0, Math.PI * 2);
     context.fillStyle = "red";
     context.fill();
     context.closePath();
   };
 
-  const drawPaddle = (context) => {
+  const drawPaddle = (context, paddle) => {
     context.fillStyle = "blue";
     context.fillRect(paddle.x, paddle.y, paddle.width, paddle.height);
   };
@@ -71,47 +129,14 @@ export default function AirHockey() {
     if (goalMessage) {
       context.fillStyle = "green";
       context.font = "30px Arial";
-      context.fillText(goalMessage, canvasWidth / 2 - 50, canvasHeight / 2);
+      context.fillText(goalMessage, CANVAS_WIDTH / 2 - 50, CANVAS_HEIGHT / 2);
     }
-  };
-
-  const updatePuck = () => {
-    setPuck((prevPuck) => {
-      const newPuck = { ...prevPuck };
-      newPuck.x += newPuck.dx;
-      newPuck.y += newPuck.dy;
-
-      // Colisión con las paredes
-      if (newPuck.x + newPuck.radius > canvasWidth || newPuck.x - newPuck.radius < 0) {
-        newPuck.dx *= -1; // Rebote horizontal
-      }
-
-      // Gol por pared superior
-      if (newPuck.y - newPuck.radius < 0 || newPuck.y + newPuck.radius > canvasHeight) {
-        setScore((prevScore) => prevScore + 1);
-        setGoalMessage("¡Gol!");
-        resetPuck();
-      }
-
-      // Colisión con la paleta
-      if (
-        newPuck.y + newPuck.radius > paddle.y &&
-        newPuck.x > paddle.x &&
-        newPuck.x < paddle.x + paddle.width
-      ) {
-        newPuck.dy *= -1;
-        newPuck.y = paddle.y - newPuck.radius; // Evita que la pelota se quede atascada
-      }
-
-      return newPuck;
-    });
   };
 
   const resetPuck = () => {
     setPuck({
-      x: canvasWidth / 2,
-      y: canvasHeight / 2,
-      radius: 15,
+      x: CANVAS_WIDTH / 2,
+      y: CANVAS_HEIGHT / 2,
       dx: 0,
       dy: 0,
     });
@@ -123,28 +148,17 @@ export default function AirHockey() {
     const rect = canvas.getBoundingClientRect();
     const mouseX = e.clientX - rect.left;
 
-    setPaddle((prevPaddle) => ({
+    setPaddle(prevPaddle => ({
       ...prevPaddle,
-      x: Math.min(Math.max(mouseX - prevPaddle.width / 2, 0), canvasWidth - prevPaddle.width),
+      x: Math.min(Math.max(mouseX - prevPaddle.width / 2, 0), CANVAS_WIDTH - prevPaddle.width),
     }));
   };
 
-  const handleKeyDown = (e) => {
-    if (e.code === "Space") {
-      if (puck.dx === 0 && puck.dy === 0) {
-        launchPuck();
-      }
-    }
-  };
-
   const launchPuck = () => {
-    const speed = 5; // Velocidad de la pelota
-    const direction = Math.random() < 0.5 ? 1 : -1; // Dirección aleatoria
-    const angle = Math.random() * Math.PI / 4 + Math.PI / 4; // Ángulo entre 45 y 135 grados
     setPuck({
       ...puck,
-      dx: speed * direction * Math.cos(angle),
-      dy: -speed * Math.sin(angle),
+      dx: PUCK_SPEED * getRandomDirection() * Math.cos(getRandomAngle()),
+      dy: -PUCK_SPEED * Math.sin(getRandomAngle()),
     });
   };
 
@@ -152,24 +166,19 @@ export default function AirHockey() {
     if (messageTimeout) clearTimeout(messageTimeout);
     const timeout = setTimeout(() => {
       setGoalMessage("");
-    }, 2000); // Mensaje visible por 2 segundos
+    }, GOAL_MESSAGE_DURATION);
     setMessageTimeout(timeout);
   };
-
-  useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown);
-    return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [puck]);
 
   return (
     <canvas
       ref={canvasRef}
-      width={canvasWidth}
-      height={canvasHeight}
+      width={CANVAS_WIDTH}
+      height={CANVAS_HEIGHT}
       onMouseMove={handleMouseMove}
       className={styles.canvas}
     />
   );
-}
+};
+
+export default AirHockey;
