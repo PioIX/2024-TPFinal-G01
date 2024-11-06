@@ -35,8 +35,8 @@ class Ball {
   reset() {
     this.x = CANVAS_WIDTH / 2;
     this.y = CANVAS_HEIGHT / 2;
-    this.dx = BALL_SPEED * (Math.random() < 0.5 ? 1 : -1); // Mantener la velocidad constante
-    this.dy = BALL_SPEED * (Math.random() < 0.5 ? 1 : -1); // Mantener la velocidad constante
+    this.dx = BALL_SPEED/*  * (Math.random() < 0.5 ? 1 : -1) */; // Mantener la velocidad constante
+    this.dy = BALL_SPEED/*  * (Math.random() < 0.5 ? 1 : -1) */; // Mantener la velocidad constante
     this.radius = BALL_RADIUS;
   }
 }
@@ -169,7 +169,7 @@ const Game = () => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [gameStarted, draw, gameOver, waitingForRestart]);
+  }, [gameStarted, gameOver, waitingForRestart]);
 
   return (
     <div className={styles.container}>
