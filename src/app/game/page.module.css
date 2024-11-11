@@ -1,6 +1,84 @@
-.canvas {
-  display: block;
-  margin: auto;
-  background-color: #ff0000; /* Color de fondo opcional */
-  border: 2px solid black; /* Borde opcional */
+/* Estilos generales */
+.container {
+  text-align: center;
+  font-family: Arial, sans-serif;
+}
+
+.form {
+  margin-top: 20px;
+}
+
+.formGroup {
+  margin-bottom: 15px;
+}
+
+.startButton, .restartButton {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.startButton:hover, .restartButton:hover {
+  background-color: #45a049;
+}
+
+.canvasContainer {
+  position: relative;
+  display: inline-block;
+}
+
+.scoreboard {
+  margin-top: 10px;
+}
+
+.gameOver {
+  margin-top: 20px;
+}
+
+.error {
+  color: red;
+}
+
+.restartMessage {
+  color: gray;
+  font-size: 14px;
+}
+
+/* Estilo de la cancha de ping pong */
+canvas {
+  background-color: #009688; /* Fondo verde para la cancha */
+  border: 2px solid #FFFFFF; /* Borde blanco */
+  border-radius: 8px;
+  position: relative;
+}
+
+/* Línea central de la cancha */
+.canvasContainer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 100%;
+  width: 4px; /* Grosor de la línea central */
+  background-color: #FFFFFF;
+  z-index: 1;
+}
+
+/* Estilos de las paletas */
+.paddle {
+  background-color: #FF5722; /* Color de las paletas */
+  width: 10px;
+  height: 70px;
+  border-radius: 5px;
+}
+
+/* Estilos de la pelota */
+.ball {
+  background-color: #FFEB3B; /* Color de la pelota */
+  border-radius: 50%;
 }

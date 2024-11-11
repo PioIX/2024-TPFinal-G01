@@ -27,7 +27,7 @@ class Ball {
   draw(context) {
     context.beginPath();
     context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-    context.fillStyle = "#FF0000"; // Ball color
+    context.fillStyle = "#FFA500"; // Cambia el color de la pelota a naranja
     context.fill();
     context.closePath();
   }
@@ -35,8 +35,8 @@ class Ball {
   reset() {
     this.x = CANVAS_WIDTH / 2;
     this.y = CANVAS_HEIGHT / 2;
-    this.dx = BALL_SPEED/*  * (Math.random() < 0.5 ? 1 : -1) */; // Mantener la velocidad constante
-    this.dy = BALL_SPEED/*  * (Math.random() < 0.5 ? 1 : -1) */; // Mantener la velocidad constante
+    this.dx = BALL_SPEED;
+    this.dy = BALL_SPEED;
     this.radius = BALL_RADIUS;
   }
 }
@@ -51,7 +51,7 @@ class Paddle {
   }
 
   draw(context) {
-    context.fillStyle = "#0000FF"; // Paddle color
+    context.fillStyle = "#FF0000"; // Cambia el color de las paletas a rojo
     context.fillRect(this.x, this.y, this.width, this.height);
   }
 
@@ -101,12 +101,10 @@ const Game = () => {
   };
 
   const checkCollisions = () => {
-    // Wall collision
     if (ball.y + ball.dy > CANVAS_HEIGHT - ball.radius || ball.y + ball.dy < ball.radius) {
       ball.dy = -ball.dy;
     }
 
-    // Paddle collision
     if (ball.x - ball.radius < player1.x + player1.width && ball.y > player1.y && ball.y < player1.y + player1.height) {
       ball.dx = -ball.dx;
       ball.x = player1.x + player1.width + ball.radius;
@@ -122,11 +120,11 @@ const Game = () => {
     if (ball.x + ball.radius > CANVAS_WIDTH) {
       setScores(prevScores => ({ ...prevScores, player1: prevScores.player1 + 1 }));
       setWaitingForRestart(true);
-      ball.reset(); // Reset ball position but wait for SPACEBAR
+      ball.reset();
     } else if (ball.x - ball.radius < 0) {
       setScores(prevScores => ({ ...prevScores, player2: prevScores.player2 + 1 }));
       setWaitingForRestart(true);
-      ball.reset(); // Reset ball position but wait for SPACEBAR
+      ball.reset();
     }
   };
 
@@ -194,29 +192,20 @@ const Game = () => {
       )}
       {gameStarted && !gameOver && (
         <div className={styles.canvasContainer}>
-          <canvas
-            ref={canvasRef}
-            width={CANVAS_WIDTH}
-            height={CANVAS_HEIGHT}
-            style={{ border: "1px solid black", marginTop: "20px" }}
-          />
+          <canvas ref={canvasRef} width={CANVAS_WIDTH} height={CANVAS_HEIGHT} />
           <div className={styles.scoreboard}>
-            <h2>Scores</h2>
-            <p>{playerName} (Jugador 1): {scores.player1}</p>
-            <p>Jugador 2: {scores.player2}</p>
+            <h2>Player 1: {scores.player1} - Player 2: {scores.player2}</h2>
           </div>
+          {waitingForRestart && <p>Presiona Espacio para reiniciar la pelota</p>}
         </div>
       )}
       {gameOver && (
         <div className={styles.gameOver}>
           <h2>¡Juego Terminado!</h2>
-          <p>{scores.player1 > scores.player2 ? `${playerName} gana!` : "¡Jugador 2 gana!"}</p>
-          <button onClick={resetGame} className={styles.restartButton}>Reiniciar Juego</button>
-        </div>
-      )}
-      {waitingForRestart && (
-        <div className={styles.restartMessage}>
-          <p>Presiona SPACE para reiniciar el juego.</p>
+          <p>{scores.player1 >= SCORE_LIMIT ? "Player 1 ganó!" : "Player 2 ganó!"}</p>
+          <button onClick={resetGame} className={styles.restartButton}>
+            Reiniciar Juego
+          </button>
         </div>
       )}
     </div>

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import styles from "./page.module.css";
-import Link from "next/link"; 
+import Link from "next/link";
 
 export default function Home() {
   const [isLogin, setIsLogin] = useState(true);
@@ -10,13 +10,13 @@ export default function Home() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false); // Nuevo estado para el éxito
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // Estado para controlar si el usuario está logueado
+  const [success, setSuccess] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const toggleForm = () => {
     setIsLogin(!isLogin);
     setError("");
-    setSuccess(false); // Reset del estado de éxito al cambiar entre login y registro
+    setSuccess(false);
   };
 
   const validateEmail = (email) => {
@@ -27,7 +27,7 @@ export default function Home() {
   const handleSubmit = (e) => {
     e.preventDefault();
     setError("");
-    setSuccess(false); // Reset del mensaje de éxito al enviar el formulario
+    setSuccess(false);
 
     if (!validateEmail(email)) {
       setError("Email inválido");
@@ -47,29 +47,35 @@ export default function Home() {
     if (isLogin) {
       const userData = JSON.parse(localStorage.getItem("user"));
       if (userData && userData.email === email && userData.password === password) {
-        setIsLoggedIn(true); // Cambia a estado logueado
-        setSuccess(true); // Establecer éxito
+        setIsLoggedIn(true);
+        setSuccess(true);
       } else {
         setError("Credenciales incorrectas");
       }
     } else {
       localStorage.setItem("user", JSON.stringify({ email, password }));
-      setIsLogin(true); // Cambia a vista de inicio de sesión
-      setSuccess(true); // Mostrar éxito al registrarse correctamente
+      setIsLogin(true);
+      setSuccess(true);
     }
   };
 
-  // Renderiza la página del juego si el usuario está logueado
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    setIsLoggedIn(false);
+  };
+
   if (isLoggedIn) {
     return (
       <div className={styles.page}>
         <main className={styles.main}>
-          <h1>Bienvenido al Juego</h1>
+          <h1 className={styles.title}>Bienvenido al Juego</h1>
           <p>¡Comienza a jugar ahora!</p>
-          <Link href="/game"> 
+          <Link href="/game">
             <button className={styles.startButton}>Jugar</button>
           </Link>
-
+          <button onClick={handleLogout} className={styles.logoutButton}>
+            Cerrar sesión
+          </button>
         </main>
         <footer className={styles.footer}>
           <p>© 2024 Mi Aplicación</p>
@@ -78,13 +84,12 @@ export default function Home() {
     );
   }
 
-  // Renderiza el formulario de inicio de sesión o registro
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <h1>{isLogin ? "Login" : "Register"}</h1>
+        <h1 className={styles.title}>{isLogin ? "Login" : "Register"}</h1>
         {error && <p className={styles.error}>{error}</p>}
-        {success && <p className={styles.success}>¡Operación exitosa!</p>} {/* Mensaje de éxito */}
+        {success && <p className={styles.success}>¡Operación exitosa!</p>}
         <form onSubmit={handleSubmit} className={styles.form}>
           <div className={styles.formGroup}>
             <label htmlFor="email">Email:</label>

@@ -1,103 +1,132 @@
-/* Estilos globales de la página */
+/* Estilo general de la página */
 .page {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #f5f5f5;
-  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg, #fd5d93, #2f2fa2);
+  color: #fff;
 }
 
 .main {
-  background-color: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  max-width: 400px;
   width: 100%;
+  max-width: 400px;
+  background-color: rgba(255, 255, 255, 0.15);
+  padding: 2rem;
+  border-radius: 10px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   text-align: center;
 }
 
+/* Estilo del título */
+.title {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #fff;
+}
+
+/* Mensaje de error y éxito */
+.error,
+.success {
+  font-size: 0.9rem;
+  color: #fff;
+  padding: 0.5rem;
+  border-radius: 5px;
+  margin-bottom: 1rem;
+}
+
+.error {
+  background-color: rgba(255, 0, 0, 0.6);
+}
+
+.success {
+  background-color: rgba(0, 255, 0, 0.6);
+}
+
+/* Estilo del formulario */
 .form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
 .formGroup {
   display: flex;
   flex-direction: column;
   text-align: left;
+  color: #fff;
 }
 
-.label {
-  margin-bottom: 0.5rem;
-  font-weight: bold;
-  color: #333;
+.formGroup label {
+  font-size: 0.9rem;
 }
 
-.input {
-  padding: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+.formGroup input {
+  padding: 0.8rem;
   font-size: 1rem;
-}
-
-.input:focus {
-  border-color: #0070f3;
-  outline: none;
-}
-
-/* Botón de envío */
-.submitButton {
-  padding: 0.75rem;
-  background-color: #0070f3;
-  color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+}
+
+/* Estilo del botón de envío */
+.submitButton {
+  padding: 0.8rem;
   font-size: 1rem;
+  font-weight: bold;
+  color: #fff;
+  background-color: #ff6b6b;
+  border: none;
+  border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s;
 }
 
 .submitButton:hover {
-  background-color: #005bb5;
+  background-color: #ff4757;
 }
 
-/* Botón de cambio de formulario (Login/Registro) */
+/* Texto de cambio entre Login y Register */
+.toggleText {
+  font-size: 0.9rem;
+  margin-top: 1rem;
+}
+
 .toggleButton {
   background: none;
   border: none;
-  color: #0070f3;
+  color: #fff;
   cursor: pointer;
-  font-size: 1rem;
   font-weight: bold;
   text-decoration: underline;
 }
 
-.toggleButton:hover {
-  color: #005bb5;
-}
-
-.toggleText {
-  margin-top: 1rem;
-}
-
-/* Mensajes de error y éxito */
-.error {
-  color: red;
-  font-size: 0.9rem;
-}
-
-.success {
-  color: green;
-  font-size: 0.9rem;
-}
-
-/* Estilo del pie de página */
+/* Estilo del footer */
 .footer {
   margin-top: 2rem;
-  font-size: 0.9rem;
-  color: #666;
+  text-align: center;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.logoutButton,
+.startButton {
+  margin-top: 1rem;
+  padding: 0.8rem;
+  font-size: 1rem;
+  font-weight: bold;
+  color: #fff;
+  background-color: #ff6b6b;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.logoutButton:hover,
+.startButton:hover {
+  background-color: #ff4757;
 }
