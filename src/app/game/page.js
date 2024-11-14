@@ -69,7 +69,8 @@ class Paddle {
 }
 
 const Game = () => {
-  const [playerName, setPlayerName] = useState("");
+  const [player1Name, setPlayer1Name] = useState("");
+  const [player2Name, setPlayer2Name] = useState("");
   const [error, setError] = useState("");
   const [gameStarted, setGameStarted] = useState(false);
   const [waitingForRestart, setWaitingForRestart] = useState(false);
@@ -80,10 +81,11 @@ const Game = () => {
   const [gameOver, setGameOver] = useState(false);
   const canvasRef = useRef(null);
 
+  // Función que maneja el inicio del juego
   const handleStartGame = (e) => {
     e.preventDefault();
-    if (playerName.trim() === "") {
-      setError("Por favor, ingresa tu nombre.");
+    if (player1Name.trim() === "" || player2Name.trim() === "") {
+      setError("Por favor, ingresa los nombres de ambos jugadores.");
       return;
     }
     setError("");
@@ -91,6 +93,7 @@ const Game = () => {
     resetGame();
   };
 
+  // Función para reiniciar el juego
   const resetGame = () => {
     setPlayer1(new Paddle(20));
     setPlayer2(new Paddle(CANVAS_WIDTH - 30));
@@ -100,22 +103,27 @@ const Game = () => {
     setWaitingForRestart(false);
   };
 
+  // Función para verificar colisiones de la pelota con las palas y las paredes
   const checkCollisions = () => {
+    // Colisiones con las paredes superior e inferior
     if (ball.y + ball.dy > CANVAS_HEIGHT - ball.radius || ball.y + ball.dy < ball.radius) {
       ball.dy = -ball.dy;
     }
 
+    // Colisión con la paleta del jugador 1
     if (ball.x - ball.radius < player1.x + player1.width && ball.y > player1.y && ball.y < player1.y + player1.height) {
       ball.dx = -ball.dx;
       ball.x = player1.x + player1.width + ball.radius;
     }
 
+    // Colisión con la paleta del jugador 2
     if (ball.x + ball.radius > player2.x && ball.y > player2.y && ball.y < player2.y + player2.height) {
       ball.dx = -ball.dx;
       ball.x = player2.x - ball.radius;
     }
   };
 
+  // Función para actualizar el marcador
   const updateScores = () => {
     if (ball.x + ball.radius > CANVAS_WIDTH) {
       setScores(prevScores => ({ ...prevScores, player1: prevScores.player1 + 1 }));
@@ -128,8 +136,11 @@ const Game = () => {
     }
   };
 
+  // Función de dibujo que se llama en cada fotograma
   const draw = useCallback(() => {
-    const context = canvasRef.current.getContext("2d");
+    const context = canvasRef.current?.getContext("2d");
+    if (!context) return; // Asegúrate de que el contexto está disponible
+
     context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     player1.draw(context);
     player2.draw(context);
@@ -146,6 +157,7 @@ const Game = () => {
     requestAnimationFrame(draw);
   }, [ball, player1, player2, scores]);
 
+  // Efecto que inicializa el juego y maneja las teclas
   useEffect(() => {
     if (!gameStarted) return;
 
@@ -159,15 +171,34 @@ const Game = () => {
         return;
       }
 
-      if (e.key === "ArrowUp") player1.move("up");
-      if (e.key === "ArrowDown") player1.move("down");
-      if (e.key === "o") player2.move("up");
-      if (e.key === "l") player2.move("down");
+      // Movimiento independiente para cada jugador
+      if (e.key === "ArrowUp") {
+        player1.move("up");
+      }
+      if (e.key === "ArrowDown") {
+        player1.move("down");
+      }
+
+      if (e.key === "o") {
+        player2.move("up");
+      }
+      if (e.key === "l") {
+        player2.move("down");
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [gameStarted, gameOver, waitingForRestart]);
+
+  useEffect(() => {
+    // Este effect garantiza que el canvas y el contexto estén listos antes de cualquier manipulación.
+    const canvas = canvasRef.current;
+    if (canvas) {
+      const context = canvas.getContext("2d");
+      // Puedes hacer cualquier preparación adicional con el contexto aquí si es necesario
+    }
+  }, []); // Este useEffect solo se ejecuta una vez cuando el componente se monta
 
   return (
     <div className={styles.container}>
@@ -176,12 +207,22 @@ const Game = () => {
       {!gameStarted && (
         <form onSubmit={handleStartGame} className={styles.form}>
           <div className={styles.formGroup}>
-            <label htmlFor="playerName">Nombre del Jugador:</label>
+            <label htmlFor="player1Name">Nombre del Jugador 1:</label>
             <input
               type="text"
-              id="playerName"
-              value={playerName}
-              onChange={(e) => setPlayerName(e.target.value)}
+              id="player1Name"
+              value={player1Name}
+              onChange={(e) => setPlayer1Name(e.target.value)}
+              required
+            />
+          </div>
+          <div className={styles.formGroup}>
+            <label htmlFor="player2Name">Nombre del Jugador 2:</label>
+            <input
+              type="text"
+              id="player2Name"
+              value={player2Name}
+              onChange={(e) => setPlayer2Name(e.target.value)}
               required
             />
           </div>
@@ -194,7 +235,7 @@ const Game = () => {
         <div className={styles.canvasContainer}>
           <canvas ref={canvasRef} width={CANVAS_WIDTH} height={CANVAS_HEIGHT} />
           <div className={styles.scoreboard}>
-            <h2>Player 1: {scores.player1} - Player 2: {scores.player2}</h2>
+            <h2>{player1Name} ({scores.player1}) - {player2Name} ({scores.player2})</h2>
           </div>
           {waitingForRestart && <p>Presiona Espacio para reiniciar la pelota</p>}
         </div>
@@ -202,7 +243,7 @@ const Game = () => {
       {gameOver && (
         <div className={styles.gameOver}>
           <h2>¡Juego Terminado!</h2>
-          <p>{scores.player1 >= SCORE_LIMIT ? "Player 1 ganó!" : "Player 2 ganó!"}</p>
+          <p>{scores.player1 >= SCORE_LIMIT ? `${player1Name} ganó!` : `${player2Name} ganó!`}</p>
           <button onClick={resetGame} className={styles.restartButton}>
             Reiniciar Juego
           </button>

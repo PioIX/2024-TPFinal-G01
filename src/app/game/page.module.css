@@ -2,6 +2,12 @@
 .container {
   text-align: center;
   font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f4f4f9; /* Fondo suave para la página */
 }
 
 .form {
@@ -29,14 +35,18 @@
 .canvasContainer {
   position: relative;
   display: inline-block;
+  margin-top: 20px;
 }
 
 .scoreboard {
   margin-top: 10px;
+  font-size: 18px;
+  font-weight: bold;
 }
 
 .gameOver {
   margin-top: 20px;
+  color: #333;
 }
 
 .error {
@@ -49,7 +59,7 @@
 }
 
 /* Estilo de la cancha de ping pong */
-canvas {
+.canvas {
   background-color: #009688; /* Fondo verde para la cancha */
   border: 2px solid #FFFFFF; /* Borde blanco */
   border-radius: 8px;
